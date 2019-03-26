@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.kotlin.idea.KotlinLanguage;
 import org.jetbrains.kotlin.lexer.KtTokens;
 import org.jetbrains.kotlin.psi.psiUtil.KtPsiUtilKt;
+import org.jetbrains.kotlin.psi.psiUtil.PsiUtilsKt;
 
 import java.util.Arrays;
 import java.util.List;
@@ -60,13 +61,7 @@ public class KtBlockExpression extends LazyParseablePsiElement implements KtElem
     @NotNull
     @Override
     public KtFile getContainingKtFile() {
-        PsiFile file = getContainingFile();
-        if(!(file instanceof KtFile))  {
-            String fileString = (file != null && file.isValid()) ? file.getText() : "";
-            throw new IllegalStateException("KtElement not inside KtFile: " + file + fileString +
-                                            "for element " + this + " of type " + this.getClass() + " node = " + getNode());
-        }
-        return (KtFile) file;
+        return PsiUtilsKt.getContainingKtFile(this);
     }
 
     @Override
