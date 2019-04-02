@@ -302,11 +302,11 @@ class PatternMatchingTypingVisitor internal constructor(facade: ExpressionTyping
             return components.builtIns.unitType
         }
 
-        val wrappedArgumentExpressions = wrapWhenEntryExpressionsAsSpecialCallArguments(expression)
+        val argumentExpressions = expression.entries.mapNotNull { it.expression }
         val callForWhen = createCallForSpecialConstruction(
             expression,
             subject.getCalleeExpressionForSpecialCall() ?: expression,
-            wrappedArgumentExpressions
+            argumentExpressions
         )
         val dataFlowInfoForArguments = createDataFlowInfoForArgumentsOfWhenCall(
             callForWhen, contextAfterSubject.dataFlowInfo, dataFlowInfoForEntries
@@ -317,21 +317,14 @@ class PatternMatchingTypingVisitor internal constructor(facade: ExpressionTyping
             ResolveConstruct.WHEN,
             object : AbstractList<String>() {
                 override fun get(index: Int): String = "entry$index"
-                override val size: Int get() = wrappedArgumentExpressions.size
+                override val size: Int get() = argumentExpressions.size
             },
-            Collections.nCopies(wrappedArgumentExpressions.size, false),
+            Collections.nCopies(argumentExpressions.size, false),
             contextWithExpectedType,
             dataFlowInfoForArguments
         )
 
         return resolvedCall.resultingDescriptor.returnType
-    }
-
-    private fun wrapWhenEntryExpressionsAsSpecialCallArguments(expression: KtWhenExpression): List<KtExpression> {
-        val psiFactory = KtPsiFactory(expression)
-        return expression.entries.mapNotNull { whenEntry ->
-            whenEntry.expression?.let { psiFactory.wrapInABlockWrapper(it) }
-        }
     }
 
     private fun analyzeConditionsInWhenEntries(

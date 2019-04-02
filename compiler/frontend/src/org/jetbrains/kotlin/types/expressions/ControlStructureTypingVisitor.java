@@ -109,10 +109,8 @@ public class ControlStructureTypingVisitor extends ExpressionTypingVisitor {
             return getTypeInfoWhenOnlyOneBranchIsPresent(
                     elseBranch, elseScope, elseInfo, thenInfo, context, ifExpression);
         }
-        KtPsiFactory psiFactory = KtPsiFactoryKt.KtPsiFactory(ifExpression, false);
-        KtBlockExpression thenBlock = psiFactory.wrapInABlockWrapper(thenBranch);
-        KtBlockExpression elseBlock = psiFactory.wrapInABlockWrapper(elseBranch);
-        Call callForIf = createCallForSpecialConstruction(ifExpression, ifExpression, Lists.newArrayList(thenBlock, elseBlock));
+
+        Call callForIf = createCallForSpecialConstruction(ifExpression, ifExpression, Lists.newArrayList(thenBranch, elseBranch));
         MutableDataFlowInfoForArguments dataFlowInfoForArguments =
                     createDataFlowInfoForArgumentsForIfCall(callForIf, conditionDataFlowInfo, thenInfo, elseInfo);
         ResolvedCall<FunctionDescriptor> resolvedCall = components.controlStructureTypingUtils.resolveSpecialConstructionAsCall(

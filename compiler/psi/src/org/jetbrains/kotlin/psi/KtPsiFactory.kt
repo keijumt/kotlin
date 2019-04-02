@@ -840,27 +840,4 @@ class KtPsiFactory @JvmOverloads constructor(private val project: Project, val m
         assert(comment.text == text)
         return comment
     }
-
-    // special hack used in ControlStructureTypingVisitor
-    // TODO: get rid of it
-    fun wrapInABlockWrapper(expression: KtExpression): KtBlockExpression {
-        if (expression is KtBlockExpression) {
-            return expression
-        }
-        val function = createFunction("fun f() { ${expression.text} }")
-        val block = function.bodyExpression as KtBlockExpression
-        return BlockWrapper(block, expression)
-    }
-
-    private class BlockWrapper(fakeBlockExpression: KtBlockExpression, private val expression: KtExpression) :
-        KtBlockExpression(fakeBlockExpression.text), KtPsiUtil.KtExpressionWrapper {
-
-        override fun getStatements(): List<KtExpression> {
-            return listOf(expression)
-        }
-
-        override fun getBaseExpression(): KtExpression {
-            return expression
-        }
-    }
 }
