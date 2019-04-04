@@ -32,7 +32,11 @@ internal class TCServiceMessagesClient(
     val settings: TCServiceMessagesClientSettings,
     val log: Logger
 ) : ServiceMessageParserCallback {
+    lateinit var rootOperationId: Any
+
     inline fun root(operation: OperationIdentifier, actions: () -> Unit) {
+        rootOperationId = operation.id
+
         RootNode(operation.id).open {
             actions()
         }
@@ -333,6 +337,7 @@ internal class TCServiceMessagesClient(
     inner class RootNode(val ownerBuildOperationId: Any) : GroupNode(null, settings.rootNodeName) {
         override val descriptor: TestDescriptorInternal = object : DefaultTestSuiteDescriptor(settings.rootNodeName, localId) {
             override fun getOwnerBuildOperationId(): Any? = this@RootNode.ownerBuildOperationId
+            override fun getParent(): TestDescriptorInternal? = null
         }
 
         override fun requireReportingNode(): TestDescriptorInternal = descriptor
@@ -376,7 +381,9 @@ internal class TCServiceMessagesClient(
             this.reportingParent = reportingParent
 
             descriptor = object : DefaultTestSuiteDescriptor(id, fullName) {
-                override fun getParent(): TestDescriptorInternal? = reportingParent.descriptor
+                override fun getDisplayName(): String = fullNameWithoutRoot
+                override fun getOwnerBuildOperationId(): Any? = rootOperationId
+                override fun getParent(): TestDescriptorInternal = reportingParent.descriptor
             }
 
             shouldReportComplete = true
@@ -413,9 +420,12 @@ internal class TCServiceMessagesClient(
     ) : Node(parent, localId) {
         val output by lazy { StringBuilder() }
 
+        private val parentDescriptor = (this@TestNode.parent as GroupNode).requireReportingNode()
+
         override val descriptor: TestDescriptorInternal =
             object : DefaultTestDescriptor(id, className, methodName, classDisplayName, displayName) {
-                override fun getParent(): TestDescriptorInternal? = (this@TestNode.parent as GroupNode).requireReportingNode()
+                override fun getOwnerBuildOperationId(): Any? = rootOperationId
+                override fun getParent(): TestDescriptorInternal = parentDescriptor
             }
 
         override fun markStarted(ts: Long) {
