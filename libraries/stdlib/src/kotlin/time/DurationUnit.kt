@@ -9,39 +9,46 @@
 package kotlin.time
 
 
-public expect enum class DurationUnit {
+public enum class DurationUnit(internal val scale: Double) {
     /**
      * Time unit representing one nanosecond, which is 1/1000 of a microsecond.
      */
-    NANOSECONDS,
+    NANOSECONDS(1.0),
     /**
      * Time unit representing one microsecond, which is 1/1000 of a millisecond.
      */
-    MICROSECONDS,
+    MICROSECONDS(1000.0),
     /**
      * Time unit representing one millisecond, which is 1/1000 of a second.
      */
-    MILLISECONDS,
+    MILLISECONDS(1e6),
     /**
      * Time unit representing one second.
      */
-    SECONDS,
+    SECONDS(1e9),
     /**
      * Time unit representing one minute.
      */
-    MINUTES,
+    MINUTES(60e9),
     /**
      * Time unit representing one hour.
      */
-    HOURS,
+    HOURS(3600e9),
     /**
      * Time unit representing one day, which always equals 24 hours.
      */
-    DAYS;
+    DAYS(86400e9);
 }
 
 
-public expect fun convertDurationUnit(value: Double, sourceUnit: DurationUnit, targetUnit: DurationUnit): Double
+public fun convertDurationUnit(value: Double, sourceUnit: DurationUnit, targetUnit: DurationUnit): Double {
+    val sourceCompareTarget = sourceUnit.scale.compareTo(targetUnit.scale)
+    return when {
+        sourceCompareTarget > 0 -> value * (sourceUnit.scale / targetUnit.scale)
+        sourceCompareTarget < 0 -> value / (targetUnit.scale / sourceUnit.scale)
+        else -> value
+    }
+}
 
 
 

@@ -12,15 +12,15 @@ package kotlin.time
 //The following declaration is incompatible because modality is different:
 //    public final expect enum class DurationUnit : Enum<DurationUnit>
 
-@Suppress("ACTUAL_WITHOUT_EXPECT")
-public actual typealias DurationUnit = java.util.concurrent.TimeUnit
-
-
-public actual fun convertDurationUnit(value: Double, sourceUnit: DurationUnit, targetUnit: DurationUnit): Double {
-    val sourceInTargets = targetUnit.convert(1, sourceUnit)
-    if (sourceInTargets > 0)
-        return value * sourceInTargets
-
-    val otherInThis = sourceUnit.convert(1, targetUnit)
-    return value / otherInThis
-}
+//@Suppress("ACTUAL_WITHOUT_EXPECT")
+//public actual typealias DurationUnit = java.util.concurrent.TimeUnit
+//
+//
+//public actual fun convertDurationUnit(value: Double, sourceUnit: DurationUnit, targetUnit: DurationUnit): Double {
+//    val sourceInTargets = targetUnit.convert(1, sourceUnit)
+//    if (sourceInTargets > 0)
+//        return value * sourceInTargets
+//
+//    val otherInThis = sourceUnit.convert(1, targetUnit)
+//    return value / otherInThis
+//}
