@@ -1031,6 +1031,14 @@ class ExpressionCodegen(
         val tryBlockStart = markNewLabel()
         mv.nop()
         gen(aTry.tryResult, aTry.asmType, data)
+
+        val isStatement = true //TODO
+        var savedValue: Local? = null
+        if (isStatement) {
+            savedValue = local(frame.enterTemp(aTry.asmType), aTry.asmType)
+            savedValue.store(onStack(aTry.asmType), mv)
+        }
+
         val tryBlockEnd = markNewLabel()
 
         val tryRegions = getCurrentTryIntervals(tryInfo, tryBlockStart, tryBlockEnd)
@@ -1053,6 +1061,10 @@ class ExpressionCodegen(
             val catchBody = clause.result
             catchBody.markLineNumber(true)
             gen(catchBody, catchBody.asmType, data)
+
+            savedValue?.let {
+                savedValue.store(onStack(aTry.asmType), mv)
+            }
 
             frame.leave(clause.catchParameter)
 
@@ -1094,6 +1106,11 @@ class ExpressionCodegen(
         }
 
         mv.mark(tryCatchBlockEnd)
+
+        savedValue?.let {
+            savedValue.put(mv)
+            frame.leaveTemp(aTry.asmType)
+        }
         return aTry.onStack
     }
 
